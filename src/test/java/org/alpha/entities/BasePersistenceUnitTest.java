@@ -7,6 +7,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.validation.ValidationException;
 
+import org.alpha.BaseTest;
+import org.alpha.TestUtility;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,7 +17,7 @@ import org.junit.BeforeClass;
 /**
  * The base class for persistence unit tests.
  */
-public class BasePersistenceUnitTest {
+public class BasePersistenceUnitTest extends BaseTest {
 
     /**
      * The persistence unit name to use for connecting to persistence.
@@ -43,8 +45,8 @@ public class BasePersistenceUnitTest {
         // Set up Derby directories.
         Properties p = System.getProperties();
         p.setProperty("derby.system.home", "./target/derbyDB");
-        p.setProperty("derby.stream.error.file", "./target/derbyLog/derby.log");
         factory = CustomPersistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        clearDB();
     }
 
     /**
@@ -64,7 +66,6 @@ public class BasePersistenceUnitTest {
     @Before
     public void setUp() throws Exception {
         entityManager = factory.createEntityManager();
-        clearDB();
     }
 
     /**
@@ -144,11 +145,8 @@ public class BasePersistenceUnitTest {
      * Clears the database.
      * @throws Exception to JUnit.
      */
-    private void clearDB() throws Exception {
-        if (!entityManager.isOpen()) {
-            entityManager = factory.createEntityManager();
-        }
-        // TestUtility.executeSQL(entityManager, TestUtility.TEST_FILES + "clear.sql");
+    private static void clearDB() throws Exception {
+        TestUtility.executeSQL(factory.createEntityManager(), TestUtility.TEST_FILES + "clear.sql");
     }
 
 }

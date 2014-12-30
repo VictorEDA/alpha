@@ -28,7 +28,7 @@ public abstract class BaseEntity implements Serializable {
     private static final long serialVersionUID = -8854612366680978064L;
 
     /**
-     * The maximum size, in bytes, of text variable module.
+     * The maximum size, in bytes, of access token.
      */
     public static final int ACCESS_TOKEN_MAX_SIZE = 255;
 

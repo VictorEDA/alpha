@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration status="WARN" monitorInterval="60">
     <loggers>
-        <root level="WARN">
+        <root level="INFO">
             <appender-ref ref="Console" />
         </root>
+        <logger name="org.hibernate.SQL" level="TRACE" additivity="false">
+            <appender-ref ref="Console" />
+        </logger>
+        <logger name="org.hibernate.type.descriptor.sql" level="TRACE" additivity="false">
+            <appender-ref ref="Console" />
+        </logger>
     </loggers>
     <appenders>
         <Console name="Console" target="SYSTEM_OUT">

@@ -3,9 +3,9 @@ package org.alpha.entities;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 /**
@@ -14,17 +14,11 @@ import org.junit.Test;
 public class OrganizationPersistenceTest extends BasePersistenceUnitTest {
 
     /**
-     * The logger to use for error logging.
-     */
-    private static final Logger LOGGER = LogManager.getLogger(OrganizationPersistenceTest.class);
-
-    /**
      * Basic create/retrieve test.
      * @throws Exception if an error occurs
      */
     @Test
     public void test_create_retrieve() throws Exception {
-        LOGGER.log(Level.WARN, "Running test.");
         // Save organization
         Organization org = new Organization();
         org.setName("test");
@@ -41,4 +35,49 @@ public class OrganizationPersistenceTest extends BasePersistenceUnitTest {
         commitTransaction();
 
     }
+
+    /**
+     * Basic create/retrieve test with users.
+     * @throws Exception if an error occurs
+     */
+    @Test
+    public void test_create_retrieve_with_users() throws Exception {
+        // Save organization
+        Organization org = new Organization();
+        org.setName("test2");
+        org.setAccessToken("accessToken");
+        persist(org);
+        List<User> users = new ArrayList<>();
+        users.add(createUser("user1"));
+        users.add(createUser("user2"));
+        org.setUsers(users);
+        for (User user : users) {
+            user.setOrganization(org);
+            persist(user);
+        }
+
+        // Retrieve organization
+        beginTransaction();
+        Organization retrieved = getEntityManager().find(Organization.class, org.getId());
+        assertNotNull("'createdAt' should not be null.", retrieved.getCreatedAt());
+        assertNotNull("'updatedAt' should not be null.", retrieved.getUpdatedAt());
+        assertEquals("'createdAt' and 'updatedAt' should be the same.", retrieved.getCreatedAt(),
+                retrieved.getUpdatedAt());
+        assertEquals("2 users should be present", 2, retrieved.getUsers().size());
+        commitTransaction();
+
+    }
+
+    /**
+     * Create a user.
+     * @param customerUser The customer user id.
+     * @return the created user
+     */
+    private User createUser(String customerUser) {
+        User user = new User();
+        user.setAccessToken("accessToken");
+        user.setCustomerUserId(customerUser);
+        return user;
+    }
+
 }
