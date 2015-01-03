@@ -16,7 +16,7 @@ public class AppExceptionMapper implements ExceptionMapper<AppException> {
     /**
      * The JSON response object.
      */
-    public static class ErrorJSON {
+    public static class ErrorJson {
         public String status;
         public String message;
     }
@@ -30,7 +30,7 @@ public class AppExceptionMapper implements ExceptionMapper<AppException> {
 
     @Override
     public Response toResponse(AppException exception) {
-        ErrorJSON json = new ErrorJSON();
+        ErrorJson json = new ErrorJson();
         json.status = "error";
         json.message = exception.getMessage();
         return Response.status(Status.INTERNAL_SERVER_ERROR).entity(json).build();

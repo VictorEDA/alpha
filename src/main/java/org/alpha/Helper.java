@@ -94,7 +94,7 @@ public class Helper {
      * Validates the value of a variable. The value can not be <code>null</code>.
      * @param value the value of the variable to be validated.
      * @param name the name of the variable to be validated.
-     * @throws PlaygroundConfigurationException if the value of the variable is <code>null</code>.
+     * @throws AppConfigurationException if the value of the variable is <code>null</code>.
      */
     public static void checkNullConfig(Object value, String name) {
         if (value == null) {
@@ -117,11 +117,24 @@ public class Helper {
     }
 
     /**
+     * Validates the value of a string. The value can not be <code>null</code> or empty.
+     * @param value the value of the variable to be validated.
+     * @param name the name of the variable to be validated.
+     * @throws AppConfigurationException if the value of the variable is <code>null</code> or empty
+     */
+    public static void checkNullOrEmptyConfig(String value, String name) {
+        checkNullConfig(value, name);
+        if (value.trim().isEmpty()) {
+            throw new AppConfigurationException("'" + name + NOT_EMPTY);
+        }
+    }
+
+    /**
      * Converts the object to JSON string.
      * @param obj the object to convert
      * @return the string representation of objects in JSON format.
      */
-    public static String toJSONString(Object obj) {
+    public static String toJsonString(Object obj) {
         final String signature = CLASS_NAME + "#toJSONString";
         try {
             return DEFAULT_OBJECT_MAPPER.writeValueAsString(obj);
@@ -135,7 +148,7 @@ public class Helper {
      * Log the method entrance message at DEBUG level.
      * @param logger the logger to use for logging, cannot be null
      * @param methodName the method name
-     * @param params The String names and corresponding values of method parameters, like:
+     * @param paramsNameValues The String names and corresponding values of method parameters, like:
      *            <code>"id", 5, "city", "Austin"</code>
      */
     public static void logEntrance(Logger logger, String methodName, Object... paramsNameValues) {
@@ -197,20 +210,20 @@ public class Helper {
      * Handle exceptions common to JPA service classes.
      * @param logger the logger to use for logging
      * @param methodName the method name to use for logging
-     * @param e the exception to handle
-     * @throws PlaygroundServiceException after handling exception
+     * @param ex the exception to handle
+     * @throws AppServiceException after handling exception
      */
-    public static void handleJpaException(Logger logger, final String methodName, RuntimeException e)
+    public static void handleJpaException(Logger logger, final String methodName, RuntimeException ex)
           throws AppServiceException {
-        if (e instanceof IllegalArgumentException) {
+        if (ex instanceof IllegalArgumentException) {
             throw Helper.logException(logger, methodName, new AppServiceException(
-                    "Query parameter(s) are not valid, or instance is not an entity.", e));
-        } else if (e instanceof IllegalStateException) {
+                    "Query parameter(s) are not valid, or instance is not an entity.", ex));
+        } else if (ex instanceof IllegalStateException) {
             throw Helper.logException(logger, methodName, new AppServiceException(
-                    "Illegal entity manager state. Nested exception: " + e.getMessage(), e));
+                    "Illegal entity manager state. Nested exception: " + ex.getMessage(), ex));
         } else {
             throw Helper.logException(logger, methodName, new AppServiceException(
-                    "Could not access persistence.", e));
+                    "Could not access persistence.", ex));
         }
     }
 }

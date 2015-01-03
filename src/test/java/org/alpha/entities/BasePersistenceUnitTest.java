@@ -43,10 +43,10 @@ public class BasePersistenceUnitTest extends BaseTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         // Set up Derby directories.
-        Properties p = System.getProperties();
-        p.setProperty("derby.system.home", "./target/derbyDB");
+        Properties props = System.getProperties();
+        props.setProperty("derby.system.home", "./target/derbyDB");
         factory = CustomPersistence.createEntityManagerFactory(PERSISTENCE_UNIT);
-        clearDB();
+        clearDb();
     }
 
     /**
@@ -74,7 +74,7 @@ public class BasePersistenceUnitTest extends BaseTest {
      */
     @After
     public void tearDown() throws Exception {
-        clearDB();
+        clearDb();
         entityManager.close();
         entityManager = null;
     }
@@ -145,8 +145,8 @@ public class BasePersistenceUnitTest extends BaseTest {
      * Clears the database.
      * @throws Exception to JUnit.
      */
-    private static void clearDB() throws Exception {
-        TestUtility.executeSQL(factory.createEntityManager(), TestUtility.TEST_FILES + "clear.sql");
+    private static void clearDb() throws Exception {
+        TestUtility.executeSql(factory.createEntityManager(), TestUtility.TEST_FILES + "clear.sql");
     }
 
 }

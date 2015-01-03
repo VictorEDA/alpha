@@ -90,7 +90,7 @@ public class TestUtility {
      * @param file the file
      * @throws Exception if an error occurs
      */
-    public static void executeSQL(EntityManager entityManager, String file) throws Exception {
+    public static void executeSql(EntityManager entityManager, String file) throws Exception {
         entityManager.clear();
         entityManager.getTransaction().begin();
 

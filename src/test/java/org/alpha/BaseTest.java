@@ -33,8 +33,8 @@ public abstract class BaseTest {
         }
 
         @Override
-        public void failed(Throwable e, Description description) {
-            LOGGER.info("FAILED Test " + description + " with " + e);
+        public void failed(Throwable ex, Description description) {
+            LOGGER.info("FAILED Test " + description + " with " + ex);
         }
     };
 

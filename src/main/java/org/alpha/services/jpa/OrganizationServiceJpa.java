@@ -12,12 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Implementation of organization service.
  */
-public class OrganizationServiceJPA extends BaseServiceJPA implements OrganizationService {
+public class OrganizationServiceJpa extends BaseServiceJpa implements OrganizationService {
 
     /**
      * Constructor. Initializes logger.
      */
-    public OrganizationServiceJPA() {
+    public OrganizationServiceJpa() {
         setLogger(LogManager.getLogger(this.getClass()));
     }
 

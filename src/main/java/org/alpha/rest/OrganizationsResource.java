@@ -34,9 +34,10 @@ public class OrganizationsResource {
     private static final Logger LOGGER = LogManager.getLogger(OrganizationsResource.class);
 
     /**
-     * The access token for creating/deleting organizations.
+     * The root access token for creating and deleting organizations.
      */
-    private static final String ROOT_ACCESS_TOKEN = "root";
+    @Inject
+    private String rootAccessToken;
 
     /**
      * The organization service.
@@ -53,7 +54,7 @@ public class OrganizationsResource {
 
     /**
      * Check initialization.
-     * @throws AppConfigurationException if organizationService is null.
+     * @throws AppConfigurationException if organizationService is null, or rootAccessToken is null/empty
      */
     @PostConstruct
     public void checkInit() {
@@ -61,7 +62,7 @@ public class OrganizationsResource {
     }
 
     @XmlRootElement
-    public static class CreateOrganizationJSON {
+    public static class CreateOrganizationJson {
         @JsonProperty("organization_id")
         public String organizationId;
     }
@@ -74,7 +75,7 @@ public class OrganizationsResource {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public Response createOrganization(CreateOrganizationJSON json) throws AppServiceException {
+    public Response createOrganization(CreateOrganizationJson json) throws AppServiceException {
         LOGGER.info("derby.system.home:" + System.getProperty("derby.system.home"));
         // TODO: add logging and error checking and exception handling
         Organization organization = new Organization();

@@ -134,7 +134,7 @@ public abstract class BaseEntity implements Serializable {
      */
     @Override
     public String toString() {
-        return Helper.toJSONString(this);
+        return Helper.toJsonString(this);
     }
 
 }

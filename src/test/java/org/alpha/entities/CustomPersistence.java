@@ -21,6 +21,12 @@ public class CustomPersistence extends Persistence {
         return CustomPersistence.createEntityManagerFactory(persistenceUnitName, null);
     }
 
+    /**
+     * Create the EntityManagerFactory instance.
+     * @param persistenceUnitName The persistence unit.
+     * @param properties Any additional EntityManagerFactory properties.
+     * @return the EntityManagerFactory instance
+     */
     public static EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, Map properties) {
         EntityManagerFactory emf = null;
         List<PersistenceProvider> providers = getProviders();
@@ -35,8 +41,9 @@ public class CustomPersistence extends Persistence {
                 break;
             }
         }
-        if (emf == null && defaultProvider != null)
+        if (emf == null && defaultProvider != null) {
             emf = defaultProvider.createEntityManagerFactory(persistenceUnitName, properties);
+        }
         if (emf == null) {
             throw new PersistenceException("No Persistence provider for EntityManager named "
                     + persistenceUnitName);

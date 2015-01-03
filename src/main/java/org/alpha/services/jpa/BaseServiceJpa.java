@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Base class for JPA persistence services.
  */
-public abstract class BaseServiceJPA {
+public abstract class BaseServiceJpa {
 
     /**
      * The logger to use for logging.
@@ -27,7 +27,7 @@ public abstract class BaseServiceJPA {
     /**
      * Default constructor.
      */
-    protected BaseServiceJPA() {
+    protected BaseServiceJpa() {
         // empty
     }
 
