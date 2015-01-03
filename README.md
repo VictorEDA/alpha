@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/VictorEDA/alpha.svg?branch=master)](https://travis-ci.org/VictorEDA/alpha)
+
 # Name TBD
 
 ## Key Technologies
