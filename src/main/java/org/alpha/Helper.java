@@ -1,11 +1,17 @@
 package org.alpha;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.alpha.services.AppServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * This class contains helper utility methods.
@@ -23,6 +29,11 @@ public class Helper {
     private static final Logger LOGGER = LogManager.getLogger(Helper.class.getName());
 
     /**
+     * The default date format to use for JSON conversion.
+     */
+    private static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+
+    /**
      * Generates string representation of objects.
      */
     private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper();
@@ -38,10 +49,71 @@ public class Helper {
     private static final String MESSAGE_ERROR = "[Error in method '%s']";
 
     /**
+     * Represents the method entry message.
+     */
+    private static final String MESSAGE_METHOD_ENTRY = "[Method entry '{}'] Input parameters[{}]";
+
+    /**
+     * Represents the method entry message.
+     */
+    private static final String MESSAGE_METHOD_ENTRY_NO_PARAMS = "[Method entry '{}']";
+
+    /**
+     * Represents the method exit message.
+     */
+    private static final String MESSAGE_METHOD_EXIT = "[Method exit '{}'] Output parameter[{}]";
+
+    /**
+     * Represents the method exit message without output parameter.
+     */
+    private static final String MESSAGE_METHOD_EXIT_NO_RESULT = "[Method exit '{}']";
+
+    /**
+     * Should not be null suffix.
+     */
+    private static final String NOT_NULL = "' should not be null.";
+
+    /**
+     * Should not be empty suffix.
+     */
+    private static final String NOT_EMPTY = "' should not be empty.";
+
+    static {
+        DEFAULT_OBJECT_MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        DEFAULT_OBJECT_MAPPER.setDateFormat(DEFAULT_DATE_FORMAT);
+    }
+
+    /**
      * Hidden constructor for utility class.
      */
     private Helper() {
         //
+    }
+
+    /**
+     * Validates the value of a variable. The value can not be <code>null</code>.
+     * @param value the value of the variable to be validated.
+     * @param name the name of the variable to be validated.
+     * @throws PlaygroundConfigurationException if the value of the variable is <code>null</code>.
+     */
+    public static void checkNullConfig(Object value, String name) {
+        if (value == null) {
+            throw new AppConfigurationException("'" + name + NOT_NULL);
+        }
+    }
+
+    /**
+     * Validates the value of an input variable. The value can not be <code>null</code>.
+     * @param logger the logger to use
+     * @param methodName the name of the calling method
+     * @param value the value of the variable to be validated.
+     * @param name the name of the variable to be validated.
+     * @throws IllegalArgumentException if the value of the variable is <code>null</code>.
+     */
+    public static void checkNull(Logger logger, String methodName, Object value, String name) {
+        if (value == null) {
+            throw logException(logger, methodName, new IllegalArgumentException("'" + name + NOT_NULL));
+        }
     }
 
     /**
@@ -60,6 +132,55 @@ public class Helper {
     }
 
     /**
+     * Log the method entrance message at DEBUG level.
+     * @param logger the logger to use for logging, cannot be null
+     * @param methodName the method name
+     * @param params The String names and corresponding values of method parameters, like:
+     *            <code>"id", 5, "city", "Austin"</code>
+     */
+    public static void logEntrance(Logger logger, String methodName, Object... paramsNameValues) {
+        if (logger.isDebugEnabled()) {
+            // Create a map of parameters
+            Map<String, Object> params = new HashMap<>();
+            for (int i = 0; i < paramsNameValues.length; i += 2) {
+                params.put((String) paramsNameValues[i], paramsNameValues[i + 1]);
+            }
+            logger.debug(MESSAGE_METHOD_ENTRY, methodName, params);
+        }
+    }
+
+    /**
+     * Log the method entrance message at DEBUG level. The method entrance is logged without params.
+     * @param logger the logger to use for logging, cannot be null
+     * @param methodName the method name
+     */
+    public static void logEntrance(Logger logger, String methodName) {
+        logger.debug(MESSAGE_METHOD_ENTRY_NO_PARAMS, methodName);
+    }
+
+    /**
+     * Log the method exit message at DEBUG level.
+     * @param <T> the result type
+     * @param logger the logger to use for logging, cannot be null
+     * @param methodName the method name
+     * @param result the method result
+     * @return the result
+     */
+    public static <T> T logExit(Logger logger, String methodName, T result) {
+        logger.debug(MESSAGE_METHOD_EXIT, methodName, result);
+        return result;
+    }
+
+    /**
+     * Log the method exit message at DEBUG level without a result.
+     * @param logger the logger to use for logging, cannot be null
+     * @param methodName the method name
+     */
+    public static void logExit(Logger logger, String methodName) {
+        logger.debug(MESSAGE_METHOD_EXIT_NO_RESULT, methodName);
+    }
+
+    /**
      * Logs the given exception and message at <code>ERROR</code> level.
      * @param <T> the exception type
      * @param logger the logger object, cannot be null
@@ -70,5 +191,26 @@ public class Helper {
     public static <T extends Throwable> T logException(Logger logger, String signature, T exception) {
         logger.error(String.format(MESSAGE_ERROR, signature), exception);
         return exception;
+    }
+
+    /**
+     * Handle exceptions common to JPA service classes.
+     * @param logger the logger to use for logging
+     * @param methodName the method name to use for logging
+     * @param e the exception to handle
+     * @throws PlaygroundServiceException after handling exception
+     */
+    public static void handleJpaException(Logger logger, final String methodName, RuntimeException e)
+          throws AppServiceException {
+        if (e instanceof IllegalArgumentException) {
+            throw Helper.logException(logger, methodName, new AppServiceException(
+                    "Query parameter(s) are not valid, or instance is not an entity.", e));
+        } else if (e instanceof IllegalStateException) {
+            throw Helper.logException(logger, methodName, new AppServiceException(
+                    "Illegal entity manager state. Nested exception: " + e.getMessage(), e));
+        } else {
+            throw Helper.logException(logger, methodName, new AppServiceException(
+                    "Could not access persistence.", e));
+        }
     }
 }
