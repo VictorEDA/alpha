@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/VictorEDA/alpha.svg?branch=master)](https://travis-ci.org/VictorEDA/alpha)
-
-# Name TBD
+# Name TBD [![Build Status](https://travis-ci.org/VictorEDA/alpha.svg?branch=master)](https://travis-ci.org/VictorEDA/alpha)
 
 ## Key Technologies
 - Java 8
