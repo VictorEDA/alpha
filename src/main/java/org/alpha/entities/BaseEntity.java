@@ -137,4 +137,26 @@ public abstract class BaseEntity implements Serializable {
         return Helper.toJsonString(this);
     }
 
+    /**
+     * Create hash code.
+     * @return the hash code
+     */
+    @Override
+    public int hashCode() {
+        return (int) id;
+    }
+
+    /**
+     * The equals method.
+     * @param obj the object to compare to
+     * @return true if the provided object is equal to this object
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || getClass() != obj.getClass() || id == 0) {
+            return false;
+        }
+        return id == ((BaseEntity) obj).id;
+    }
+
 }

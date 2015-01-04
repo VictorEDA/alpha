@@ -132,7 +132,7 @@ public class OrganizationsResource {
             response = Response.status(Status.NOT_FOUND).build();
         } else {
             try {
-                Organization organization = organizationService.read(organizationId);
+                Organization organization = organizationService.read(organizationId, true);
                 response = Response.ok().entity(organization).build();
             } catch (EntityNotFoundException e) {
                 response = Response.status(Status.NOT_FOUND).build();
@@ -143,7 +143,56 @@ public class OrganizationsResource {
 
     // TODO: Delete organization.
 
-    // TODO: Provision user
+    public static class CreateUserJson {
+        @JsonProperty("customer_user_id")
+        @NotNull
+        @NotEmpty
+        public String customerUserId;
+    }
+
+    /**
+     * Create user.
+     * @param json The JSON object specifying user properties.
+     * @return 201 and created user<br>
+     *         400 if bad request<br>
+     *         401 if unauthorized<br>
+     *         404 if organization does not exist<br>
+     *         409 if user already exists<br>
+     *         500 if server error
+     */
+    @Path("/{organization_id}/users")
+    @POST
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response createUser(@PathParam("organization_id") long organizationId, @Valid CreateUserJson json)
+            throws AppServiceException {
+        final String methodName = "createUser";
+
+        Helper.logEntrance(LOGGER, methodName, "organizationId", organizationId, "json", json);
+        Response response = null;
+
+        if (organizationId <= 0) {
+            response = Response.status(Status.NOT_FOUND).build();
+        } else {
+            try {
+                Organization organization = organizationService.read(organizationId, false);
+                User user = new User();
+                user.setOrganization(organization);
+                user.setCustomerUserId(json.customerUserId);
+                user.setAccessToken(RandomStringUtils.randomAlphanumeric(32));
+                organizationService.create(user);
+                response = Response.status(Status.CREATED).entity(user).build();
+            } catch (EntityNotFoundException e) {
+                response = Response.status(Status.NOT_FOUND).build();
+            } catch (EntityExistsException e) {
+                response =
+                        Response.status(Status.CONFLICT).entity(new ErrorJson("error", e.getMessage()))
+                                .build();
+            }
+        }
+
+        return Helper.logExit(LOGGER, methodName, response);
+    }
 
     @Path("/test")
     @GET

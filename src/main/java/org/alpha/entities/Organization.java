@@ -55,7 +55,7 @@ public class Organization extends BaseEntity {
      * Organization users.
      */
     @OneToMany(mappedBy = "organization", cascade = { CascadeType.MERGE, CascadeType.REFRESH },
-            fetch = FetchType.EAGER)
+            fetch = FetchType.LAZY)
     private List<User> users;
 
     /**

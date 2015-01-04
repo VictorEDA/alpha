@@ -7,6 +7,7 @@ import javax.persistence.TypedQuery;
 
 import org.alpha.Helper;
 import org.alpha.entities.Organization;
+import org.alpha.entities.User;
 import org.alpha.services.AppServiceException;
 import org.alpha.services.EntityExistsException;
 import org.alpha.services.EntityNotFoundException;
@@ -23,6 +24,12 @@ public class OrganizationServiceJpa extends BaseServiceJpa implements Organizati
      * JPQL query to get organization by name.
      */
     static final String GET_ORGANIZATION_BY_NAME = "SELECT b FROM Organization b WHERE b.name = :name";
+
+    /**
+     * JPQL query to get user by customer user id.
+     */
+    static final String GET_USER_BY_CUSTOMER_USER_ID =
+            "SELECT b FROM User b WHERE b.customerUserId = :customerUserId";
 
     /**
      * Constructor. Initializes logger.
@@ -60,7 +67,36 @@ public class OrganizationServiceJpa extends BaseServiceJpa implements Organizati
     }
 
     @Override
-    public Organization read(long organizationId) throws AppServiceException {
+    @Transactional(rollbackFor = Exception.class)
+    public void create(User user) throws AppServiceException {
+        final String methodName = "create";
+
+        // Log method entrance
+        Helper.logEntrance(getLogger(), methodName, "user", user);
+
+        // Check input
+        Helper.checkNull(getLogger(), methodName, user, "user");
+
+        try {
+            // Check if user already exists.
+            if (findUser(user.getCustomerUserId()) == null) {
+                getEntityManager().persist(user);
+            } else {
+                throw Helper.logException(getLogger(), methodName, new EntityExistsException(
+                        "User with customer user id '" + user.getCustomerUserId() + "' already exists."));
+            }
+        } catch (IllegalArgumentException | IllegalStateException | PersistenceException e) {
+            Helper.handleJpaException(getLogger(), methodName, e);
+        }
+
+        // Log method exit
+        Helper.logExit(getLogger(), methodName);
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Organization read(long organizationId, boolean fetchUsers) throws AppServiceException {
         final String methodName = "read";
         Helper.logEntrance(getLogger(), methodName, "organizationId", organizationId);
 
@@ -73,6 +109,9 @@ public class OrganizationServiceJpa extends BaseServiceJpa implements Organizati
             if (result == null) {
                 throw Helper.logException(getLogger(), methodName, new EntityNotFoundException(
                         "Organization with name '" + organizationId + "' was not found."));
+            }
+            if (fetchUsers) {
+                result.getUsers().size();
             }
         } catch (IllegalArgumentException | IllegalStateException | PersistenceException e) {
             Helper.handleJpaException(getLogger(), methodName, e);
@@ -91,6 +130,21 @@ public class OrganizationServiceJpa extends BaseServiceJpa implements Organizati
                 getEntityManager().createQuery(GET_ORGANIZATION_BY_NAME, Organization.class);
         query.setParameter("name", name);
         List<Organization> resultList = query.getResultList();
+        if (resultList.isEmpty()) {
+            return null;
+        }
+        return resultList.get(0);
+    }
+
+    /**
+     * Find user by customer user id.
+     * @param name The organization name.
+     * @return the organization, or null if organization was not found
+     */
+    private User findUser(String customerUserId) {
+        TypedQuery<User> query = getEntityManager().createQuery(GET_USER_BY_CUSTOMER_USER_ID, User.class);
+        query.setParameter("customerUserId", customerUserId);
+        List<User> resultList = query.getResultList();
         if (resultList.isEmpty()) {
             return null;
         }
