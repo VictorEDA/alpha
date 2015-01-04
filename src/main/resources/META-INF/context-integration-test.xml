@@ -2,6 +2,7 @@
 
   <Resource name="jdbc/db" auth="Container" type="javax.sql.DataSource"
                driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+               factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
                maxActive="100"
                minIdle="2"
                maxIdle="30"
@@ -9,7 +10,7 @@
                validationQuery="VALUES 1"
                testOnBorrow="true"
                removeAbandoned="true"
-               url="jdbc:derby:dev;create=true"
+               url="jdbc:derby:memory:test;create=true"
                username="root"
                password="root"
                />

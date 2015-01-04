@@ -14,14 +14,6 @@ import org.alpha.AppException;
 public class AppExceptionMapper implements ExceptionMapper<AppException> {
 
     /**
-     * The JSON response object.
-     */
-    public static class ErrorJson {
-        public String status;
-        public String message;
-    }
-
-    /**
      * Default constructor.
      */
     public AppExceptionMapper() {
@@ -30,9 +22,7 @@ public class AppExceptionMapper implements ExceptionMapper<AppException> {
 
     @Override
     public Response toResponse(AppException exception) {
-        ErrorJson json = new ErrorJson();
-        json.status = "error";
-        json.message = exception.getMessage();
+        ErrorJson json = new ErrorJson("error", exception.getMessage());
         return Response.status(Status.INTERNAL_SERVER_ERROR).entity(json).build();
     }
 }

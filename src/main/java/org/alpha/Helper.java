@@ -117,6 +117,21 @@ public class Helper {
     }
 
     /**
+     * Validates the value of an input variable. The value can not be null or empty.
+     * @param logger the logger to use
+     * @param methodName the name of the calling method
+     * @param value the value of the variable to be validated.
+     * @param name the name of the variable to be validated.
+     * @throws IllegalArgumentException if the value of the variable is null or empty.
+     */
+    public static void checkNullOrEmpty(Logger logger, String methodName, String value, String name) {
+        checkNull(logger, methodName, value, name);
+        if (value.trim().isEmpty()) {
+            throw logException(logger, methodName, new IllegalArgumentException("'" + name + NOT_EMPTY));
+        }
+    }
+
+    /**
      * Validates the value of a string. The value can not be <code>null</code> or empty.
      * @param value the value of the variable to be validated.
      * @param name the name of the variable to be validated.
@@ -126,6 +141,21 @@ public class Helper {
         checkNullConfig(value, name);
         if (value.trim().isEmpty()) {
             throw new AppConfigurationException("'" + name + NOT_EMPTY);
+        }
+    }
+
+    /**
+     * Validates the value of an input variable. The value can not be 0 or negative.
+     * @param logger the logger to use
+     * @param methodName the name of the calling method
+     * @param value the value of the variable to be validated.
+     * @param name the name of the variable to be validated.
+     * @throws IllegalArgumentException if the value of the variable is 0 or negative.
+     */
+    public static void checkZeroOrNegative(Logger logger, String methodName, long value, String name) {
+        if (value < 1) {
+            throw logException(logger, methodName, new IllegalArgumentException("'" + name
+                    + "' should not be zero or negative."));
         }
     }
 

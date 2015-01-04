@@ -11,7 +11,7 @@ public interface OrganizationService {
      * Create organization.
      * @param organization The organization to create.
      * @throws IllegalArgumentException if organization is null
-     * @throws AppServiceException if an error occurs
+     * @throws AppServiceException if an error occurs, or EntityExistsException if organization already exists
      */
     void create(Organization organization) throws AppServiceException;
 
@@ -19,15 +19,16 @@ public interface OrganizationService {
      * Retrieve organization.
      * @param organizationId The organization id.
      * @return the organization instance
-     * @throws IllegalArgumentException if organizationId is null/empty
-     * @throws AppServiceException if an error occurs, or EntityNotFoundException if user was not found
+     * @throws IllegalArgumentException if organizationId is zero or negative
+     * @throws AppServiceException if an error occurs, or EntityNotFoundException if organization was not
+     *             found
      */
-    Organization read(String organizationId) throws AppServiceException;
+    Organization read(long organizationId) throws AppServiceException;
 
     /**
      * Update organization.
      * @param organization The organization to update.
-     * @throws IllegalArgumentException if user is null
+     * @throws IllegalArgumentException if organization is null
      * @throws AppServiceException if an error occurs
      */
     void update(Organization organization) throws AppServiceException;
@@ -35,9 +36,9 @@ public interface OrganizationService {
     /**
      * Delete organization from persistence.
      * @param organizationId The organization id.
-     * @throws IllegalArgumentException if organizationId is null/empty
+     * @throws IllegalArgumentException if organizationId zero or negative
      * @throws AppServiceException if an error occurs
      */
-    void delete(String organizationId) throws AppServiceException;
+    void delete(long organizationId) throws AppServiceException;
 
 }

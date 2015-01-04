@@ -1,6 +1,7 @@
 package org.alpha.rest;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 
 /**
  * Configuration for REST resources.
@@ -18,6 +19,7 @@ public class RestConfig extends ResourceConfig {
         register(ObjectMapperProvider.class);
 
         // Exception mappers
+        property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
         register(AppExceptionMapper.class);
     }
 

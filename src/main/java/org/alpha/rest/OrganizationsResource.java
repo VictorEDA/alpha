@@ -2,23 +2,29 @@ package org.alpha.rest;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.ws.rs.core.Response.Status;
 
 import org.alpha.AppConfigurationException;
 import org.alpha.Helper;
 import org.alpha.entities.Organization;
 import org.alpha.services.AppServiceException;
+import org.alpha.services.EntityExistsException;
+import org.alpha.services.EntityNotFoundException;
 import org.alpha.services.OrganizationService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -34,10 +40,10 @@ public class OrganizationsResource {
     private static final Logger LOGGER = LogManager.getLogger(OrganizationsResource.class);
 
     /**
-     * The root access token for creating and deleting organizations.
+     * The root secret for retrieving root access token.
      */
     @Inject
-    private String rootAccessToken;
+    private String rootSecret;
 
     /**
      * The organization service.
@@ -61,30 +67,78 @@ public class OrganizationsResource {
         Helper.checkNullConfig(organizationService, "organizationService");
     }
 
-    @XmlRootElement
     public static class CreateOrganizationJson {
-        @JsonProperty("organization_id")
-        public String organizationId;
+        @JsonProperty("organization_name")
+        @NotNull
+        @NotEmpty
+        public String organizationName;
     }
 
     /**
      * Create organization.
      * @param json The JSON object specifying organization properties.
-     * @return organization creation status
+     * @return 201 and created organization<br>
+     *         400 if bad request<br>
+     *         401 if unauthorized<br>
+     *         409 if organization already exists<br>
+     *         500 if server error
      */
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public Response createOrganization(CreateOrganizationJson json) throws AppServiceException {
-        LOGGER.info("derby.system.home:" + System.getProperty("derby.system.home"));
-        // TODO: add logging and error checking and exception handling
+    public Response createOrganization(@Valid CreateOrganizationJson json) throws AppServiceException {
+        final String methodName = "createOrganization";
+
+        Helper.logEntrance(LOGGER, methodName, "json", json);
+        Response response = null;
+
         Organization organization = new Organization();
-        organization.setName(json.organizationId);
+        organization.setName(json.organizationName);
         organization.setAccessToken(RandomStringUtils.randomAlphanumeric(32));
-        organizationService.create(organization);
-        return Response.ok().entity(organization).build();
-        // return "{\"access_token\":\"" + organization.getAccessToken() + "\"}";
+
+        try {
+            organizationService.create(organization);
+            response = Response.status(Status.CREATED).entity(organization).build();
+        } catch (EntityExistsException e) {
+            response = Response.status(Status.CONFLICT).entity(new ErrorJson("error", e.getMessage())).build();
+        }
+
+        return Helper.logExit(LOGGER, methodName, response);
     }
+
+    /**
+     * Get organization.
+     * @param organizationId The organization id.
+     * @return 200 and organization<br>
+     *         400 if bad request<br>
+     *         401 if unauthorized<br>
+     *         404 if not found<br>
+     *         500 if server error
+     */
+    @Path("/{organization_id}")
+    @GET
+    @Produces("application/json")
+    public Response getOrganization(@PathParam("organization_id") long organizationId)
+            throws AppServiceException {
+        final String methodName = "getOrganization";
+
+        Helper.logEntrance(LOGGER, methodName, "organizationId", organizationId);
+
+        Response response = null;
+
+        try {
+            Organization organization = organizationService.read(organizationId);
+            response = Response.ok().entity(organization).build();
+        } catch (EntityNotFoundException e) {
+            response = Response.status(Status.NOT_FOUND).build();
+        }
+
+        return Helper.logExit(LOGGER, methodName, response);
+    }
+
+    // TODO: Delete organization.
+
+    // TODO: Provision user
 
     @Path("/test")
     @GET
@@ -92,12 +146,6 @@ public class OrganizationsResource {
     public String sayPlainTextHello() {
         return "{\"status\":\"good\"}";
     }
-
-    // Get organization.
-
-    // Delete organization.
-
-    // Provision user
 
     /**
      * Retrieves the 'organizationService' variable.
@@ -113,6 +161,22 @@ public class OrganizationsResource {
      */
     public void setOrganizationService(OrganizationService organizationService) {
         this.organizationService = organizationService;
+    }
+
+    /**
+     * Retrieves the 'rootSecret' variable.
+     * @return the 'rootSecret' variable value
+     */
+    public String getRootSecret() {
+        return rootSecret;
+    }
+
+    /**
+     * Sets the 'rootSecret' variable.
+     * @param rootSecret the new 'rootSecret' variable value to set
+     */
+    public void setRootSecret(String rootSecret) {
+        this.rootSecret = rootSecret;
     }
 
 }

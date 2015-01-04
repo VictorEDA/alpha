@@ -1,10 +1,15 @@
 package org.alpha.services.jpa;
 
+import java.util.List;
+
 import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 
 import org.alpha.Helper;
 import org.alpha.entities.Organization;
 import org.alpha.services.AppServiceException;
+import org.alpha.services.EntityExistsException;
+import org.alpha.services.EntityNotFoundException;
 import org.alpha.services.OrganizationService;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
  * Implementation of organization service.
  */
 public class OrganizationServiceJpa extends BaseServiceJpa implements OrganizationService {
+
+    /**
+     * JPQL query to get organization by name.
+     */
+    static final String GET_ORGANIZATION_BY_NAME = "SELECT b FROM Organization b WHERE b.name = :name";
 
     /**
      * Constructor. Initializes logger.
@@ -33,47 +43,68 @@ public class OrganizationServiceJpa extends BaseServiceJpa implements Organizati
         Helper.checkNull(getLogger(), methodName, organization, "organization");
 
         try {
-            getEntityManager().persist(organization);
+            // Check if organization already exists.
+            if (findOrganization(organization.getName()) == null) {
+                getEntityManager().persist(organization);
+            } else {
+                throw Helper.logException(getLogger(), methodName, new EntityExistsException(
+                        "Organization with name '" + organization.getName() + "' already exists."));
+            }
         } catch (IllegalArgumentException | IllegalStateException | PersistenceException e) {
             Helper.handleJpaException(getLogger(), methodName, e);
         }
 
         // Log method exit
         Helper.logExit(getLogger(), methodName);
-        // TODO Auto-generated method stub
 
     }
 
-    /**
-     * X.
-     * @param organizationId
-     * @return
-     * @throws AppServiceException
-     */
     @Override
-    public Organization read(String organizationId) throws AppServiceException {
-        // TODO Auto-generated method stub
-        return null;
+    public Organization read(long organizationId) throws AppServiceException {
+        final String methodName = "read";
+        Helper.logEntrance(getLogger(), methodName, "organizationId", organizationId);
+
+        Helper.checkZeroOrNegative(getLogger(), methodName, organizationId, "organizationId");
+
+        Organization result = null;
+
+        try {
+            result = getEntityManager().find(Organization.class, organizationId);
+            if (result == null) {
+                throw Helper.logException(getLogger(), methodName, new EntityNotFoundException(
+                        "Organization with name '" + organizationId + "' was not found."));
+            }
+        } catch (IllegalArgumentException | IllegalStateException | PersistenceException e) {
+            Helper.handleJpaException(getLogger(), methodName, e);
+        }
+
+        return Helper.logExit(getLogger(), methodName, result);
     }
 
     /**
-     * X.
-     * @param organization
-     * @throws AppServiceException
+     * Find organization by name.
+     * @param name The organization name.
+     * @return the organization, or null if organization was not found
      */
+    private Organization findOrganization(String name) {
+        TypedQuery<Organization> query =
+                getEntityManager().createQuery(GET_ORGANIZATION_BY_NAME, Organization.class);
+        query.setParameter("name", name);
+        List<Organization> resultList = query.getResultList();
+        if (resultList.isEmpty()) {
+            return null;
+        }
+        return resultList.get(0);
+    }
+
     @Override
     public void update(Organization organization) throws AppServiceException {
         // TODO Auto-generated method stub
 
     }
 
-    /**
-     * X.
-     * @param organizationId
-     * @throws AppServiceException
-     */
     @Override
-    public void delete(String organizationId) throws AppServiceException {
+    public void delete(long organizationId) throws AppServiceException {
         // TODO Auto-generated method stub
 
     }

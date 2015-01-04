@@ -19,7 +19,7 @@
                            http://www.springframework.org/schema/jee/spring-jee-4.1.xsd">
 
   <!-- Properties -->
-  <bean id="rootAccessToken" class="java.lang.String"
+  <bean id="rootSecret" class="java.lang.String"
     c:_0="root"/>
 
   <!-- Spring beans. Required to be declared for injection into Jersey resource classes. -->

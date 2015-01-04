@@ -5,11 +5,12 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
   <properties>
-    <derby.system.home>./target/derbyDB</derby.system.home>
+    <derby.system.home>./${project.build.directory}/derbyDB</derby.system.home>
     <derby.version>10.11.1.1</derby.version>
     <jersey.version>2.14</jersey.version>
     <log4j.version>2.1</log4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <skipTests>false</skipTests>
     <slf4j.version>1.7.9</slf4j.version>
     <spring.version>4.1.4.RELEASE</spring.version>
@@ -73,6 +74,11 @@
       </dependency>
       <dependency>
           <groupId>org.glassfish.jersey.ext</groupId>
+          <artifactId>jersey-bean-validation</artifactId>
+          <version>${jersey.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish.jersey.ext</groupId>
           <artifactId>jersey-spring3</artifactId>
           <version>${jersey.version}</version>
       </dependency>
@@ -124,7 +130,28 @@
         <version>2.18.1</version>
         <configuration>
           <skipTests>${skipTests}</skipTests>
+          <excludes>
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.18.1</version>
+        <configuration>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -157,8 +184,28 @@
           <systemProperties>
             <derby.system.home>${derby.system.home}</derby.system.home>
           </systemProperties>
-          <contextFile>src/main/webapp/META-INF/context.xml</contextFile>
+          <contextFile>src/main/resources/META-INF/context.xml</contextFile>
         </configuration>
+        <executions>
+          <execution>
+            <id>start-tomcat</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <fork>true</fork>
+              <contextFile>src/main/resources/META-INF/context-integration-test.xml</contextFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-tomcat</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>shutdown</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
