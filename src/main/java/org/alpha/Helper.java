@@ -19,6 +19,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class Helper {
 
     /**
+     * The default date format to use for JSON conversion.
+     */
+    public static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+
+    /**
      * The name of the class.
      */
     private static final String CLASS_NAME = Helper.class.getName();
@@ -27,11 +32,6 @@ public class Helper {
      * The logger to use for logging.
      */
     private static final Logger LOGGER = LogManager.getLogger(Helper.class.getName());
-
-    /**
-     * The default date format to use for JSON conversion.
-     */
-    private static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
     /**
      * Generates string representation of objects.

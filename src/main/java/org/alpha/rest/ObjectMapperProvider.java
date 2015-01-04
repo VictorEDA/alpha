@@ -1,10 +1,9 @@
 package org.alpha.rest;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
+
+import org.alpha.Helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -20,14 +19,9 @@ public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
      */
     private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper();
 
-    /**
-     * The default date format to use for JSON conversion.
-     */
-    private static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-
     static {
         DEFAULT_OBJECT_MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        DEFAULT_OBJECT_MAPPER.setDateFormat(DEFAULT_DATE_FORMAT);
+        DEFAULT_OBJECT_MAPPER.setDateFormat(Helper.DEFAULT_DATE_FORMAT);
     }
 
     /**

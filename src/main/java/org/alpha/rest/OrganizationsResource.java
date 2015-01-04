@@ -1,5 +1,7 @@
 package org.alpha.rest;
 
+import java.util.ArrayList;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -17,6 +19,7 @@ import javax.ws.rs.core.Response.Status;
 import org.alpha.AppConfigurationException;
 import org.alpha.Helper;
 import org.alpha.entities.Organization;
+import org.alpha.entities.User;
 import org.alpha.services.AppServiceException;
 import org.alpha.services.EntityExistsException;
 import org.alpha.services.EntityNotFoundException;
@@ -95,6 +98,7 @@ public class OrganizationsResource {
         Organization organization = new Organization();
         organization.setName(json.organizationName);
         organization.setAccessToken(RandomStringUtils.randomAlphanumeric(32));
+        organization.setUsers(new ArrayList<User>());
 
         try {
             organizationService.create(organization);
@@ -110,7 +114,6 @@ public class OrganizationsResource {
      * Get organization.
      * @param organizationId The organization id.
      * @return 200 and organization<br>
-     *         400 if bad request<br>
      *         401 if unauthorized<br>
      *         404 if not found<br>
      *         500 if server error
@@ -125,14 +128,16 @@ public class OrganizationsResource {
         Helper.logEntrance(LOGGER, methodName, "organizationId", organizationId);
 
         Response response = null;
-
-        try {
-            Organization organization = organizationService.read(organizationId);
-            response = Response.ok().entity(organization).build();
-        } catch (EntityNotFoundException e) {
+        if (organizationId <= 0) {
             response = Response.status(Status.NOT_FOUND).build();
+        } else {
+            try {
+                Organization organization = organizationService.read(organizationId);
+                response = Response.ok().entity(organization).build();
+            } catch (EntityNotFoundException e) {
+                response = Response.status(Status.NOT_FOUND).build();
+            }
         }
-
         return Helper.logExit(LOGGER, methodName, response);
     }
 

@@ -4,6 +4,9 @@
         <root level="INFO">
             <appender-ref ref="Console" />
         </root>
+        <logger name="org.alpha" level="DEBUG" additivity="false">
+            <appender-ref ref="Console" />
+        </logger>
         <logger name="org.glassfish.jersey" level="TRACE" additivity="false">
             <appender-ref ref="Console" />
         </logger>
